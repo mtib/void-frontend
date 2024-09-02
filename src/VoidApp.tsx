@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
 import './VoidApp.css';
-import { SERVER_URL } from './server';
 import Background from './components/background/Background';
 import { StorageContextProvider } from './context/StorageContext';
 import { RouteContextProvider } from './context/RouteContext';

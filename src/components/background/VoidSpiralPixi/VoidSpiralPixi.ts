@@ -103,8 +103,8 @@ export function install(
 
             const upDotProductCenter = dot(normalize(diff), new Point(0, 1));
             const leftDotProductCenter = dot(normalize(diff), new Point(-1, 0));
-            star.x -= diff.x / distance + upDotProductCenter * swirlStrength;
-            star.y -= diff.y / distance + leftDotProductCenter * swirlStrength;
+            star.x -= diff.x / distance ** 2 + upDotProductCenter * swirlStrength * ((minEdge - distance) / minEdge) ** 5;
+            star.y -= diff.y / distance ** 2 + leftDotProductCenter * swirlStrength * ((minEdge - distance) / minEdge) ** 5;
             star.rotation += app.ticker.deltaTime;
         });
     });
