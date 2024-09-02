@@ -1,7 +1,13 @@
 import { Application, Container, Graphics, GraphicsContext, Point } from "pixi.js";
 import { dot, magnitude, normalize, outsideRectSample } from "./utils";
+import { VoidContextType } from "../../../context/VoidContext";
+import { DocumentContextType } from "../../../context/DocumentContext";
 
-export function install(app: Application) {
+export function install(
+    app: Application,
+    onVoidContext: (arg1: (arg0: VoidContextType) => void) => void = () => { },
+    onDocumentContext: (arg1: (arg0: DocumentContextType) => void) => void = () => { },
+) {
     let minEdge = 0;
     function resize() {
         app.renderer.resize(window.innerWidth, window.innerHeight);
@@ -9,6 +15,14 @@ export function install(app: Application) {
     };
     resize();
     addEventListener('resize', resize);
+
+    onVoidContext((voidContext) => {
+        console.log("pixi notified of a void context change", voidContext);
+    });
+
+    onDocumentContext((documentContext) => {
+        console.log("pixi notified of a document context change", documentContext);
+    });
 
     const randomPhaseX = Math.random() * Math.PI;
     const randomPhaseY = Math.random() * Math.PI;
@@ -92,7 +106,6 @@ export function install(app: Application) {
             star.x -= diff.x / distance + upDotProductCenter * swirlStrength;
             star.y -= diff.y / distance + leftDotProductCenter * swirlStrength;
             star.rotation += app.ticker.deltaTime;
-
         });
     });
 }
