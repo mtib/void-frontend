@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import './VoidApp.css';
 import { SERVER_URL } from './server';
+import Background from './components/background/Background';
 
 function VoidApp() {
-  const [count, setCount] = useState(0);
-
   const [message, setMessage] = useState('VOID');
 
   useEffect(() => {
@@ -19,10 +18,8 @@ function VoidApp() {
     <>
       <h1>{message}</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
       </div>
+      <Background />
     </>
   );
 }
