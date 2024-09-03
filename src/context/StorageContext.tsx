@@ -1,4 +1,4 @@
-import { createContext, FC, PropsWithChildren, useContext, useEffect, useState } from "react";
+import { createContext, FC, PropsWithChildren, useContext } from "react";
 import { VoidId } from "./RouteContext";
 import useStorageState from "react-use-storage-state";
 
@@ -16,7 +16,7 @@ export interface VoidInfo {
 export const StorageContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const [knownVoids, setKnownVoids] = useStorageState<VoidInfo[]>("known-voids-v1", [])
- 
+
     return (
         <context.Provider value={{
             knownVoids,
