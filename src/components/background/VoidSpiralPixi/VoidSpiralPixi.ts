@@ -4,11 +4,18 @@ import { VoidContextType } from "../../../context/VoidContext";
 import { DocumentContextType } from "../../../context/DocumentContext";
 import _ from "lodash";
 
+let fused = false
 export function install(
     app: Application,
     onVoidContext: (arg1: (arg0: VoidContextType) => void) => void = () => { },
     onDocumentContext: (arg1: (arg0: DocumentContextType) => void) => void = () => { },
 ) {
+    if (fused) {
+        throw new Error("already fused")
+        return
+    }
+    fused = true
+    console.log("installing void spiral pixi");
     let minEdge = 0;
     function resize() {
         app.renderer.resize(window.innerWidth, window.innerHeight);
@@ -17,8 +24,18 @@ export function install(
     resize();
     addEventListener('resize', resize);
 
+    let inVoid = false
+
+    const defaultBlackHoleSize = 200;
+    const inVoidBlackHoleSize = 400;
+    let blackHoleTargetSize = defaultBlackHoleSize
+    let blackHoleSize = 0;
+
+
     onVoidContext((voidContext) => {
-        console.log("pixi notified of a void context change", voidContext);
+        console.log(voidContext)
+        inVoid = voidContext.voidId !== undefined;
+        blackHoleTargetSize = inVoid ? inVoidBlackHoleSize : defaultBlackHoleSize;
     });
 
     onDocumentContext((documentContext) => {
@@ -27,24 +44,24 @@ export function install(
 
     const randomPhaseX = Math.random() * Math.PI;
     const randomPhaseY = Math.random() * Math.PI;
-    const blackHoleSize = 200;
 
-    const blackHole = (() => {
-        const g = new Graphics();
-        g.circle(0, 0, blackHoleSize);
-        g.fill({
+    const blackHolePosition = new Point(app.canvas.width / 2, app.canvas.height / 2);
+    const blackHole = new Graphics();
+    const blackHoleUpdate = () => {
+        blackHole.clear();
+        blackHole.circle(0, 0, blackHoleSize);
+        blackHole.fill({
             color: '#150215',
             alpha: 1.0
         });
-        g.stroke({
+        blackHole.stroke({
             color: '#dad',
             width: 1.5,
         });
-        g.x = app.canvas.width / 2;
-        g.y = app.canvas.height / 2;
-        g.scale = 0;
-        return g;
-    })();
+        blackHole.x = blackHolePosition.x
+        blackHole.y = blackHolePosition.y
+    };
+    blackHoleUpdate();
 
     const starContainer = new Container();
 
@@ -83,11 +100,14 @@ export function install(
             app.canvas.width / 2 + Math.sin(randomPhaseX + elapsedDt / 1000) * maxTravel,
             app.canvas.height / 2 + Math.cos(randomPhaseY + elapsedDt / 700 + 1) * maxTravel,
         );
-        blackHole.x = centerOfGravity.x;
-        blackHole.y = centerOfGravity.y;
+        blackHolePosition.x = centerOfGravity.x;
+        blackHolePosition.y = centerOfGravity.y;
+        blackHoleUpdate()
 
-        if (blackHole.scale.x < 1) {
-            blackHole.scale = Math.min(Math.max(0, Math.exp(elapsedMs / 300 - 0.3) - 1), 1);
+        if (blackHoleSize < blackHoleTargetSize) {
+            blackHoleSize = Math.min(blackHoleTargetSize, blackHoleSize + app.ticker.elapsedMS / 10);
+        } else if (blackHoleSize > blackHoleTargetSize) {
+            blackHoleSize = Math.max(blackHoleTargetSize, blackHoleSize - app.ticker.elapsedMS / 10);
         }
 
         starContainer.children.forEach((star) => {
@@ -107,7 +127,7 @@ export function install(
             }
 
             const distance = magnitude(diff);
-            if (distance < blackHoleSize * blackHole.scale.x - starSize) {
+            if (distance < blackHoleSize - starSize) {
                 const outSide = outsideRectSample();
                 const inOutSide = Math.random() * 2 - 0.5;
                 if (Math.random() < 0.5) {
@@ -122,8 +142,8 @@ export function install(
 
             const upDotProductCenter = dot(normalize(diff), new Point(0, 1));
             const leftDotProductCenter = dot(normalize(diff), new Point(-1, 0));
-            star.x -= (diff.x / (distance / 10) ** 2 + upDotProductCenter * swirlStrength * ((minEdge - distance) / minEdge) ** 5) * blackHole.scale.x;
-            star.y -= (diff.y / (distance / 10) ** 2 + leftDotProductCenter * swirlStrength * ((minEdge - distance) / minEdge) ** 5) * blackHole.scale.x;
+            star.x -= (diff.x / (distance / 10) ** 2 + upDotProductCenter * swirlStrength * ((minEdge - distance) / minEdge) ** 5)
+            star.y -= (diff.y / (distance / 10) ** 2 + leftDotProductCenter * swirlStrength * ((minEdge - distance) / minEdge) ** 5)
             star.rotation += app.ticker.deltaTime;
         });
     });

@@ -24,6 +24,17 @@ function Background() {
         documentContextCallbackRef.current(documentContext);
     }, [documentContext]);
 
+    const voidContextRef = useRef(voidContext);
+    const documentContextRef = useRef(documentContext);
+
+    useEffect(() => {
+        voidContextRef.current = voidContext;
+    }, [voidContext]);
+
+    useEffect(() => {
+        documentContextRef.current = documentContext;
+    }, [documentContext]);
+
     useEffect(() => {
         (async () => {
             const app = new Application();
@@ -37,6 +48,9 @@ function Background() {
                 (callback) => voidContextCallbackRef.current = callback,
                 (callback) => documentContextCallbackRef.current = callback,
             );
+
+            voidContextCallbackRef.current(voidContextRef.current);
+            documentContextCallbackRef.current(documentContextRef.current);
         })();
     }, []);
 
