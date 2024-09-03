@@ -1,14 +1,20 @@
-import { createContext, FC, PropsWithChildren, useContext } from "react";
+import { createContext, FC, PropsWithChildren, useContext, useMemo } from "react";
+import { useRouteContext } from "./RouteContext";
 
 export interface DocumentContextType {
+    documentId: string | undefined;
+    setDocumentId: (documentId: string | undefined) => void;
 }
 
 const context = createContext<DocumentContextType | undefined>(undefined);
 
 export const DocumentContextProvider: FC<PropsWithChildren> = ({ children }) => {
-
+    const routeContext = useRouteContext();
     return (
-        <context.Provider value={{}}>
+        <context.Provider value={useMemo(() => ({
+            documentId: routeContext.documentId,
+            setDocumentId: routeContext.setDocumentId,
+        }), [routeContext.documentId, routeContext.setDocumentId])}>
             {children}
         </context.Provider>
     );

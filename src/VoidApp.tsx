@@ -4,6 +4,7 @@ import { StorageContextProvider } from './context/StorageContext';
 import { RouteContextProvider } from './context/RouteContext';
 import { VoidContextProvider } from './context/VoidContext';
 import { DocumentContextProvider } from './context/DocumentContext';
+import Selector from './components/selector/Selector';
 
 function VoidApp() {
   return (
@@ -13,6 +14,7 @@ function VoidApp() {
           <VoidContextProvider>
             <DocumentContextProvider>
               <h1>VOID</h1>
+              <Selector />
               <Background />
             </DocumentContextProvider>
           </VoidContextProvider>

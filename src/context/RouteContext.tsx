@@ -1,12 +1,12 @@
-import { createContext, FC, PropsWithChildren, useContext, useState } from "react";
+import { createContext, FC, PropsWithChildren, useContext, useEffect, useRef, useState } from "react";
 
 export type VoidId = string;
 export type DocumentId = string;
 export interface RouteContextType {
     documentId: DocumentId | undefined;
-    setDocumentId: (documentId: DocumentId) => void;
+    setDocumentId: (documentId: DocumentId | undefined) => void;
     voidId: VoidId | undefined;
-    setVoidId: (voidId: VoidId) => void;
+    setVoidId: (voidId: VoidId | undefined) => void;
 }
 
 const context = createContext<RouteContextType | undefined>(undefined);
@@ -14,6 +14,40 @@ const context = createContext<RouteContextType | undefined>(undefined);
 export const RouteContextProvider: FC<PropsWithChildren> = ({ children }) => {
     const [voidId, setVoidId] = useState<VoidId | undefined>(undefined);
     const [documentId, setDocumentId] = useState<DocumentId | undefined>(undefined);
+
+    const initialised = useRef(false);
+
+    useEffect(() => {
+        if (!initialised.current) {
+            initialised.current = true;
+            const hash = window.location.hash;
+            if (hash) {
+                const match = RegExp(/#(v-[a-zA-Z0-9]+)(\/(d-[a-zA-Z0-9]+))?/).exec(hash);
+                if (!match) {
+                    history.pushState({}, '', `/#`);
+                    return
+                }
+                const voidId = match[1];
+                const documentId = match[3];
+                if (voidId) {
+                    setVoidId(voidId);
+                }
+                if (documentId) {
+                    setDocumentId(documentId);
+                }
+            }
+            return
+        }
+        if (voidId && documentId) {
+            history.pushState({}, '', `/#${voidId}/${documentId}`);
+            return
+        }
+        if (voidId) {
+            history.pushState({}, '', `/#${voidId}`);
+            return
+        }
+        history.pushState({}, '', `/#`);
+    }, [voidId, documentId]);
 
     return (
         <context.Provider value={{

@@ -1,4 +1,4 @@
-import { createContext, FC, PropsWithChildren, useContext, useEffect, useState } from "react";
+import { createContext, FC, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
 import { useRouteContext, VoidId } from "./RouteContext";
 import { SERVER_URL } from "../server";
 
@@ -26,11 +26,11 @@ export const VoidContextProvider: FC<PropsWithChildren> = ({ children }) => {
     }, [routeContext.voidId]);
 
     return (
-        <context.Provider value={{
+        <context.Provider value={useMemo(() => ({
             voidId: routeContext.voidId,
             setVoidId: routeContext.setVoidId,
             metadata,
-        }}>
+        }), [routeContext.voidId, routeContext.setVoidId, metadata])}>
             {children}
         </context.Provider>
     );
