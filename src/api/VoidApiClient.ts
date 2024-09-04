@@ -5,13 +5,13 @@ const VoidApiClient = {
     createVoid: async () => {
         const resp = await fetch(`${SERVER_URL}/void`, {
             method: 'POST',
-        })
-        return await resp.json() as { id: string };
+        });
+        return await resp.json() as { id: string; };
     },
 
     getDocuments: async (voidId: string) => {
         const resp = await fetch(`${SERVER_URL}/void/${voidId}/documents`);
-        return await resp.json() as { id: VoidId, documents: DocumentId[] };
+        return await resp.json() as { id: VoidId, documents: DocumentId[]; };
     },
 
     setMetadata: async (voidId: string, metadata: object) => {
@@ -23,13 +23,33 @@ const VoidApiClient = {
 
     getMetadata: async (voidId: string) => {
         const resp = await fetch(`${SERVER_URL}/void/${voidId}/metadata`);
-        return await resp.json() as { data: object | null };
+        return await resp.json() as { data: object | null; };
     },
 
     getDocument: async (voidId: string, documentId: string) => {
         const resp = await fetch(`${SERVER_URL}/document/${voidId}/${documentId}`);
-        return await resp.blob()
+        return await resp.blob();
     },
-}
+
+    createDocument: async (voidId: string, data: Blob | undefined) => {
+        const resp = await fetch(`${SERVER_URL}/document/${voidId}`, {
+            method: 'POST',
+            body: data
+        });
+        return await resp.json() as {
+            documentId: DocumentId;
+            voidId: VoidId;
+            size: number;
+            approximateTime: number;
+        };
+    },
+
+    updateDocument: async (voidId: string, documentId: string, data: Blob) => {
+        await fetch(`${SERVER_URL}/document/${voidId}/${documentId}`, {
+            method: 'PUT',
+            body: data
+        });
+    }
+};
 
 export default VoidApiClient;

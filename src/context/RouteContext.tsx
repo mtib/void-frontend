@@ -11,6 +11,21 @@ export interface RouteContextType {
 
 const context = createContext<RouteContextType | undefined>(undefined);
 
+const parseHash = (hash: string) => {
+    const match = RegExp(/#(v-[a-zA-Z0-9]+)(\/(d-[a-zA-Z0-9]+))?/).exec(hash);
+    if (!match) {
+        history.pushState({}, '', `/#`);
+        return { voidId: undefined, documentId: undefined };
+    }
+    const voidId = match[1];
+    const documentId = match[3];
+    return {
+        voidId,
+        documentId
+    }
+}
+
+
 export const RouteContextProvider: FC<PropsWithChildren> = ({ children }) => {
     const [voidId, setVoidId] = useState<VoidId | undefined>(undefined);
     const [documentId, setDocumentId] = useState<DocumentId | undefined>(undefined);
@@ -22,13 +37,7 @@ export const RouteContextProvider: FC<PropsWithChildren> = ({ children }) => {
             initialised.current = true;
             const hash = window.location.hash;
             if (hash) {
-                const match = RegExp(/#(v-[a-zA-Z0-9]+)(\/(d-[a-zA-Z0-9]+))?/).exec(hash);
-                if (!match) {
-                    history.pushState({}, '', `/#`);
-                    return
-                }
-                const voidId = match[1];
-                const documentId = match[3];
+                const { voidId, documentId } = parseHash(hash);
                 if (voidId) {
                     setVoidId(voidId);
                 }
@@ -36,17 +45,32 @@ export const RouteContextProvider: FC<PropsWithChildren> = ({ children }) => {
                     setDocumentId(documentId);
                 }
             }
+            addEventListener('popstate', () => {
+                const hash = window.location.hash;
+                const { voidId, documentId } = parseHash(hash);
+                setDocumentId(documentId);
+                setVoidId(voidId);
+            });
+
             return
         }
         if (voidId && documentId) {
-            history.pushState({}, '', `/#${voidId}/${documentId}`);
+            const newHash = `#${voidId}/${documentId}`;
+            if (window.location.hash !== newHash) {
+                history.pushState({}, '', newHash);
+            }
             return
         }
         if (voidId) {
-            history.pushState({}, '', `/#${voidId}`);
+            const newHash = `#${voidId}`;
+            if (window.location.hash !== newHash) {
+                history.pushState({}, '', newHash);
+            }
             return
         }
-        history.pushState({}, '', `/#`);
+        if (!['', '/', '/#'].includes(window.location.hash)) {
+            history.pushState({}, '', "/#");
+        }
     }, [voidId, documentId]);
 
     return (
