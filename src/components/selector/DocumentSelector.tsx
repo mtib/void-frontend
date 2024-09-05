@@ -153,6 +153,7 @@ const DocumentSelector: FC = () => {
                     if (!voidId) {
                         return;
                     }
+                    setDocumentEditMode(true);
                     (async () => {
                         const newDocument = await VoidApiClient.createDocument(voidId, undefined);
                         routeContext.setVoidId(newDocument.voidId);
