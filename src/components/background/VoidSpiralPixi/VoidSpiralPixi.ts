@@ -3,18 +3,20 @@ import { dot, magnitude, normalize, outsideRectSample } from "./utils";
 import { VoidContextType } from "../../../context/VoidContext";
 import { DocumentContextType } from "../../../context/DocumentContext";
 import _ from "lodash";
+import { outlineColor } from "../../document/editor/Editor";
+import Color from "color";
 
-let fused = false
+let fused = false;
 export function install(
     app: Application,
     onVoidContext: (arg1: (arg0: VoidContextType) => void) => void = () => { },
     onDocumentContext: (arg1: (arg0: DocumentContextType) => void) => void = () => { },
 ) {
     if (fused) {
-        throw new Error("already fused")
-        return
+        throw new Error("already fused");
+        return;
     }
-    fused = true
+    fused = true;
     console.log("installing void spiral pixi");
     let minEdge = 0;
     function resize() {
@@ -24,18 +26,37 @@ export function install(
     resize();
     addEventListener('resize', resize);
 
-    let inVoid = false
+    let inVoid = false;
 
     const defaultBlackHoleSize = 200;
     const inVoidBlackHoleSize = 400;
-    let blackHoleTargetSize = defaultBlackHoleSize
+    let blackHoleTargetSize = defaultBlackHoleSize;
     let blackHoleSize = 0;
 
+    let primaryColor = Color(outlineColor);
+    const starContainer = new Container();
+    const redrawStar = <T>(star: T): T => {
+        // @ts-ignore
+        return star.clear()
+            .rect(-starSize / 2, -starSize / 2, starSize, starSize)
+            .regularPoly(0, 0, starSize, 6)
+            .fill({ color: primaryColor.hex() });
+    };
 
     onVoidContext((voidContext) => {
-        console.log(voidContext)
         inVoid = voidContext.voidId !== undefined;
         blackHoleTargetSize = inVoid ? inVoidBlackHoleSize : defaultBlackHoleSize;
+        const nextColorCandidate = voidContext.localVoidData?.color || outlineColor;
+
+        if (/^#([0-9a-fA-F]{3}|[0-9a-f-A-F]{6})$/.test(nextColorCandidate)) {
+            primaryColor = Color(nextColorCandidate);
+            starContainer.children.forEach((star) => {
+                if (!(star instanceof Graphics)) {
+                    return;
+                }
+                redrawStar(star);
+            });
+        }
     });
 
     onDocumentContext((documentContext) => {
@@ -51,32 +72,28 @@ export function install(
         blackHole.clear();
         blackHole.circle(0, 0, blackHoleSize);
         blackHole.fill({
-            color: '#150215',
+            color: primaryColor.lightness(5).hex(),
             alpha: 1.0
         });
         blackHole.stroke({
-            color: '#dad',
+            color: primaryColor.lighten(0.2).hex(),
             width: 1.5,
         });
-        blackHole.x = blackHolePosition.x
-        blackHole.y = blackHolePosition.y
+        blackHole.x = blackHolePosition.x;
+        blackHole.y = blackHolePosition.y;
     };
     blackHoleUpdate();
-
-    const starContainer = new Container();
 
     app.stage.addChild(starContainer);
     app.stage.addChild(blackHole);
 
+    const swirlStrength = 3;
+
     const starCount = 1000;
     const starSize = 3;
 
-    const swirlStrength = 3;
 
-    const starContext = new GraphicsContext()
-        .rect(-starSize / 2, -starSize / 2, starSize, starSize)
-        .regularPoly(0, 0, starSize, 6)
-        .fill({ color: '#dad' });
+    const starContext = redrawStar(new GraphicsContext());
 
     const starSizeFactor = new WeakMap<Graphics, number>();
     for (let i = 0; i < starCount; i++) {
@@ -102,7 +119,7 @@ export function install(
         );
         blackHolePosition.x = centerOfGravity.x;
         blackHolePosition.y = centerOfGravity.y;
-        blackHoleUpdate()
+        blackHoleUpdate();
 
         if (blackHoleSize < blackHoleTargetSize) {
             blackHoleSize = Math.min(blackHoleTargetSize, blackHoleSize + app.ticker.elapsedMS / 10);
@@ -142,8 +159,8 @@ export function install(
 
             const upDotProductCenter = dot(normalize(diff), new Point(0, 1));
             const leftDotProductCenter = dot(normalize(diff), new Point(-1, 0));
-            star.x -= (diff.x / (distance / 10) ** 2 + upDotProductCenter * swirlStrength * ((minEdge - distance) / minEdge) ** 5)
-            star.y -= (diff.y / (distance / 10) ** 2 + leftDotProductCenter * swirlStrength * ((minEdge - distance) / minEdge) ** 5)
+            star.x -= (diff.x / (distance / 10) ** 2 + upDotProductCenter * swirlStrength * ((minEdge - distance) / minEdge) ** 5);
+            star.y -= (diff.y / (distance / 10) ** 2 + leftDotProductCenter * swirlStrength * ((minEdge - distance) / minEdge) ** 5);
             star.rotation += app.ticker.deltaTime;
         });
     });

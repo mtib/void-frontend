@@ -1,4 +1,5 @@
 import { createContext, FC, PropsWithChildren, useContext, useEffect, useRef, useState } from "react";
+import { useStorageContext } from "./StorageContext";
 
 export type VoidId = string;
 export type DocumentId = string;
@@ -22,8 +23,8 @@ const parseHash = (hash: string) => {
     return {
         voidId,
         documentId
-    }
-}
+    };
+};
 
 
 export const RouteContextProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -31,6 +32,14 @@ export const RouteContextProvider: FC<PropsWithChildren> = ({ children }) => {
     const [documentId, setDocumentId] = useState<DocumentId | undefined>(undefined);
 
     const initialised = useRef(false);
+    const storageContext = useStorageContext();
+
+    useEffect(() => {
+        if (!voidId) {
+            return;
+        }
+        storageContext.addVoid(voidId);
+    }, [voidId, storageContext.addVoid]);
 
     useEffect(() => {
         if (!initialised.current) {
@@ -52,21 +61,21 @@ export const RouteContextProvider: FC<PropsWithChildren> = ({ children }) => {
                 setVoidId(voidId);
             });
 
-            return
+            return;
         }
         if (voidId && documentId) {
             const newHash = `#${voidId}/${documentId}`;
             if (window.location.hash !== newHash) {
                 history.pushState({}, '', newHash);
             }
-            return
+            return;
         }
         if (voidId) {
             const newHash = `#${voidId}`;
             if (window.location.hash !== newHash) {
                 history.pushState({}, '', newHash);
             }
-            return
+            return;
         }
         if (!['', '/', '/#'].includes(window.location.hash)) {
             history.pushState({}, '', "/#");

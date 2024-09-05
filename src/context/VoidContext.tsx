@@ -2,12 +2,15 @@ import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffec
 import { useRouteContext, VoidId } from "./RouteContext";
 import VoidApiClient from "../api/VoidApiClient";
 import { useStorageContext, VoidInfo } from "./StorageContext";
+import { backgroundColor, outlineColor } from "../components/document/editor/Editor";
+import Color from "color";
 
 export interface VoidContextType {
     voidId: string | undefined;
     setVoidId: (voidId: VoidId) => void;
     metadata: { [k: string]: string | undefined; } | undefined;
     setMetadata: (metadata: { [k: string]: string | undefined; }) => void;
+    localVoidData: VoidInfo | undefined;
 }
 
 const context = createContext<VoidContextType | undefined>(undefined);
@@ -16,6 +19,8 @@ export const VoidContextProvider: FC<PropsWithChildren> = ({ children }) => {
     const routeContext = useRouteContext();
     const [metadata, setMetadata] = useState<{ [k: string]: string | undefined; } | undefined>(undefined);
     const metadataRef = useRef(metadata);
+
+    const storage = useStorageContext();
 
     useEffect(() => {
         const voidId = routeContext.voidId;
@@ -56,7 +61,8 @@ export const VoidContextProvider: FC<PropsWithChildren> = ({ children }) => {
             setVoidId: routeContext.setVoidId,
             metadata,
             setMetadata: setRemoteMetadata,
-        }), [routeContext.voidId, routeContext.setVoidId, metadata])}>
+            localVoidData: storage.knownVoids.find(v => v.id == routeContext.voidId),
+        }), [routeContext.voidId, routeContext.setVoidId, metadata, storage.knownVoids])}>
             {children}
         </context.Provider>
     );
@@ -88,4 +94,21 @@ export const useUpdateCurrentVoidLocalStorage = () => {
     return useCallback((update: (it: VoidInfo) => VoidInfo) => {
         storage.updateVoid(voidId, update);
     }, [voidId, storage]);
+};
+
+export const useVoidPrimaryColor = () => {
+    const { localVoidData } = useVoidContext();
+    const color = localVoidData?.color;
+    if (color && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(color)) {
+        return color;
+    }
+    return outlineColor;
+};
+
+export const useVoidBackgroundColor = () => {
+    const color = useVoidPrimaryColor();
+    if (color) {
+        return Color(color).lightness(7).hex();
+    }
+    return backgroundColor;
 };

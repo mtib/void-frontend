@@ -2,10 +2,11 @@ import { FC, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { DocumentId, useRouteContext } from "../../../context/RouteContext";
 import VoidApiClient from "../../../api/VoidApiClient";
 import showdown from "showdown";
+import { useVoidBackgroundColor, useVoidPrimaryColor } from "../../../context/VoidContext";
+import { VoidStyledButton } from "../../button";
 
-const outlineColor = '#a06ca0';
-const backgroundColor = '#1a041a';
-
+export const outlineColor = '#a06ca0';
+export const backgroundColor = '#1a041a';
 
 const Editor: FC<PropsWithChildren<{
     initialDocument: DocumentId;
@@ -20,6 +21,8 @@ const Editor: FC<PropsWithChildren<{
 }) => {
         const routeContext = useRouteContext();
 
+        const primaryColor = useVoidPrimaryColor();
+        const backgroundColor = useVoidBackgroundColor();
         const [data, setData] = useState<string | undefined>(undefined);
 
         useEffect(() => {
@@ -87,9 +90,9 @@ const Editor: FC<PropsWithChildren<{
                     top: '10px',
                     left: '10px',
                     right: '10px',
-                    borderRadius: '10px',
+                    borderRadius: '18px',
                     background: backgroundColor,
-                    borderColor: outlineColor,
+                    borderColor: primaryColor,
                     borderWidth: '1px',
                     borderStyle: 'solid',
                     minHeight: 'calc(100vh - 40px)',
@@ -102,28 +105,39 @@ const Editor: FC<PropsWithChildren<{
                         flexDirection: "row",
                     }}
                 >
-                    <button
+                    <VoidStyledButton
                         onClick={() => {
                             forceUpdate();
                             routeContext.setDocumentId(undefined);
                         }}
                     >
                         Back
-                    </button>
-                    <button
+                    </VoidStyledButton>
+                    <VoidStyledButton
                         onClick={() => {
                             setEditMode(!editMode);
                         }}
                     >
                         {editMode ? 'Preview' : 'Edit'}
-                    </button>
+                    </VoidStyledButton>
                 </div>
                 {editMode &&
                     <textarea
+                        style={{
+                            background: backgroundColor,
+                            color: 'white',
+                            borderColor: primaryColor,
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderRadius: '10px',
+                            padding: '10px',
+                            fontFamily: 'monospace',
+                            fontSize: '16px',
+                            flexGrow: 1,
+                        }}
                         name="editor"
                         id="editor"
                         value={data}
-                        rows={20}
                         onChange={(e) => {
                             setData(e.target.value);
                         }}
@@ -135,6 +149,8 @@ const Editor: FC<PropsWithChildren<{
                         dangerouslySetInnerHTML={{ __html: html }}
                         style={{
                             textAlign: 'left',
+                            paddingLeft: '10px',
+                            paddingRight: '10px',
                         }}
                     >
                     </div>

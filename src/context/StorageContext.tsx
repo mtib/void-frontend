@@ -13,6 +13,8 @@ const context = createContext<StorageContextType | undefined>(undefined);
 export interface VoidInfo {
     id: VoidId,
     name: string | undefined,
+    password: string | undefined,
+    color: string | undefined,
 }
 
 export const StorageContextProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -31,6 +33,8 @@ export const StorageContextProvider: FC<PropsWithChildren> = ({ children }) => {
                         return [...current, {
                             id,
                             name: undefined,
+                            password: undefined,
+                            color: undefined,
                         }];
                     }
                 });

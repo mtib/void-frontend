@@ -3,6 +3,7 @@ import { useStorageContext } from "../../context/StorageContext";
 import VoidApiClient from "../../api/VoidApiClient";
 import { useVoidContext } from "../../context/VoidContext";
 import { useRouteContext } from "../../context/RouteContext";
+import { sortBy } from "lodash";
 
 
 const VoidSelector: FC = () => {
@@ -34,27 +35,28 @@ const VoidSelector: FC = () => {
     >
         <button onClick={createVoid}>Create new</button>
         {
-            storage.knownVoids.map((voidInfo) => {
-                return <button
-                    key={voidInfo.id}
-                    onClick={() => voids.setVoidId(voidInfo.id)}
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center'
-                    }}
-                >
-                    {<span>{voidInfo.name || 'Unnamed'}</span>}
-                    <span
+            sortBy(storage.knownVoids, it => it.name || it.id)
+                .map((voidInfo) => {
+                    return <button
+                        key={voidInfo.id}
+                        onClick={() => voids.setVoidId(voidInfo.id)}
                         style={{
-                            fontSize: '0.8em',
-                            color: 'gray',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center'
                         }}
                     >
-                        {voidInfo.id}
-                    </span>
-                </button>;
-            })
+                        {<span>{voidInfo.name || 'Unnamed'}</span>}
+                        <span
+                            style={{
+                                fontSize: '0.8em',
+                                color: 'gray',
+                            }}
+                        >
+                            {voidInfo.id}
+                        </span>
+                    </button>;
+                })
         }
     </div>;
 };
