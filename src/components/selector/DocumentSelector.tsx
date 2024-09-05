@@ -194,7 +194,14 @@ const DocumentSelector: FC = () => {
             </div>
             {
                 documentData
-                    .filter((doc) => doc.text.match(searchText))
+                    .filter((doc) => {
+                        try {
+                            return doc.text.match(new RegExp(searchText, 'i'));
+                        } catch (e) {
+                            console.error(e);
+                            return true;
+                        }
+                    })
                     .map((doc) => {
                         return <div
                             key={doc.documentId}
