@@ -14,7 +14,7 @@ const VoidApiClient = {
         return await resp.json() as { id: VoidId, documents: DocumentId[]; };
     },
 
-    setMetadata: async (voidId: string, metadata: object) => {
+    setMetadata: async (voidId: string, metadata: { [k: string]: string | undefined; }) => {
         await fetch(`${SERVER_URL}/void/${voidId}/metadata`, {
             method: 'PUT',
             body: JSON.stringify(metadata)
@@ -23,7 +23,7 @@ const VoidApiClient = {
 
     getMetadata: async (voidId: string) => {
         const resp = await fetch(`${SERVER_URL}/void/${voidId}/metadata`);
-        return await resp.json() as { data: object | null; };
+        return await resp.json() as { data: { [k: string]: string | undefined; } | null; };
     },
 
     getDocument: async (voidId: string, documentId: string) => {

@@ -19,7 +19,7 @@ const VoidSelector: FC = () => {
         currentlyCreatingRef.current = true;
         (async () => {
             const newVoid = await VoidApiClient.createVoid();
-            storage.addVoid(newVoid.id)
+            storage.addVoid(newVoid.id);
             currentlyCreatingRef.current = false;
             routing.setVoidId(newVoid.id);
         })();
@@ -34,16 +34,29 @@ const VoidSelector: FC = () => {
     >
         <button onClick={createVoid}>Create new</button>
         {
-            storage.knownVoids.map((voidId) => {
+            storage.knownVoids.map((voidInfo) => {
                 return <button
-                    key={voidId.id}
-                    onClick={() => voids.setVoidId(voidId.id)}
+                    key={voidInfo.id}
+                    onClick={() => voids.setVoidId(voidInfo.id)}
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center'
+                    }}
                 >
-                    {voidId.id}
+                    {<span>{voidInfo.name || 'Unnamed'}</span>}
+                    <span
+                        style={{
+                            fontSize: '0.8em',
+                            color: 'gray',
+                        }}
+                    >
+                        {voidInfo.id}
+                    </span>
                 </button>;
             })
         }
     </div>;
-}
+};
 
 export default VoidSelector;

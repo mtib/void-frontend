@@ -27,8 +27,12 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
+  min-width: min(30vw, 800px);
   min-height: 100vh;
+}
+
+#root {
+  min-width: min(40vw, 800px);
 }
 
 h1 {

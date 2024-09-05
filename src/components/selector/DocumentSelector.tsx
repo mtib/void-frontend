@@ -2,6 +2,8 @@ import { FC, useEffect, useState } from "react";
 import { DocumentId, useRouteContext, VoidId } from "../../context/RouteContext";
 import VoidApiClient from "../../api/VoidApiClient";
 import Editor from "../document/editor/Editor";
+import { useCurrentVoidLocalStorage } from "../../context/VoidContext";
+import { useStorageContext } from "../../context/StorageContext";
 
 const extractTitle = (text: string) => {
     const firstNewline = text.indexOf('\n');
@@ -14,10 +16,15 @@ const extractTitle = (text: string) => {
 
 const DocumentSelector: FC = () => {
     const routeContext = useRouteContext();
+    const storageContext = useStorageContext();
 
     const [documentIds, setDocumentIds] = useState<DocumentId[]>([]);
 
     const [searchText, setSearchText] = useState<string>('');
+
+    const [voidNameEditing, setVoidNameEditing] = useState(false);
+
+    const [documentEditMode, setDocumentEditMode] = useState(false);
 
     useEffect(() => {
         setDocumentIds([]);
@@ -62,6 +69,17 @@ const DocumentSelector: FC = () => {
         })();
     }, [documentIds]);
 
+    const [tempVoidName, setTempVoidName] = useState<string | undefined>(undefined);
+    const localVoidData = useCurrentVoidLocalStorage();
+
+    useEffect(() => {
+        if (!localVoidData) {
+            setTempVoidName(undefined);
+            return;
+        }
+        setTempVoidName(localVoidData.name);
+    }, [localVoidData]);
+
     return <>
         <div
             style={{
@@ -75,7 +93,7 @@ const DocumentSelector: FC = () => {
                     display: 'flex',
                     flexDirection: 'row',
                     gap: '10px',
-                    alignItems: 'center',
+                    alignItems: 'stretch',
                 }}
             >
                 <button
@@ -84,7 +102,50 @@ const DocumentSelector: FC = () => {
                         routeContext.setVoidId(undefined);
                     }}
                 >Back</button>
-                <span>{routeContext.voidId}</span>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        flexGrow: 1,
+                    }}
+                >
+                    <span>
+                        {voidNameEditing
+                            ? <input
+                                value={tempVoidName}
+                                onChange={(e) => {
+                                    setTempVoidName(e.target.value);
+                                }}
+                            ></input>
+                            : <b>
+                                {
+                                    localVoidData?.name || 'Unnamed'
+                                }
+                            </b>
+                        }
+                    </span>
+                    <span
+                        style={{
+                            color: 'gray',
+                            fontSize: 'small',
+                        }}
+                    >
+                        {routeContext.voidId}
+                    </span>
+                </div>
+                <button
+                    onClick={() => {
+                        if (voidNameEditing) {
+                            storageContext.updateVoid(routeContext.voidId, it => ({
+                                ...it,
+                                name: tempVoidName,
+                            }));
+                        }
+                        setVoidNameEditing(it => !it);
+                    }}
+                >
+                    {voidNameEditing ? 'Save' : 'Rename'}
+                </button>
             </div>
             <button
                 onClick={() => {
@@ -116,7 +177,7 @@ const DocumentSelector: FC = () => {
                     alignItems: 'center',
                 }}
             >
-                <span>Search</span>
+                <span>Regex</span>
                 <input
                     type="text"
                     name="searchbar"
@@ -132,19 +193,42 @@ const DocumentSelector: FC = () => {
             </div>
             {
                 documentData
-                    .filter((doc) => doc.text.includes(searchText))
+                    .filter((doc) => doc.text.match(searchText))
                     .map((doc) => {
-                        return <button
+                        return <div
                             key={doc.documentId}
-                            onClick={() => {
-                                routeContext.setDocumentId(doc.documentId);
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                gap: '10px',
+                                alignItems: 'center',
                             }}
                         >
-                            {doc.title}
-                        </button>;
+                            <button
+                                onClick={() => {
+                                    setDocumentEditMode(false);
+                                    routeContext.setDocumentId(doc.documentId);
+                                }}
+                                style={{
+                                    flexGrow: 1,
+                                }}
+                            >
+                                {doc.title}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setDocumentEditMode(true);
+                                    routeContext.setDocumentId(doc.documentId);
+                                }}
+                            >
+                                Edit
+                            </button>
+                        </div>;
                     })
             }
             {routeContext.documentId && <Editor
+                editMode={documentEditMode}
+                setEditMode={setDocumentEditMode}
                 initialDocument={routeContext.documentId}
                 updateData={(data) => {
                     setDocumentData(documentData => {

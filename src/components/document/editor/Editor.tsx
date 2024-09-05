@@ -1,6 +1,7 @@
 import { FC, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { DocumentId, useRouteContext } from "../../../context/RouteContext";
 import VoidApiClient from "../../../api/VoidApiClient";
+import showdown from "showdown";
 
 const outlineColor = '#a06ca0';
 const backgroundColor = '#1a041a';
@@ -8,10 +9,14 @@ const backgroundColor = '#1a041a';
 
 const Editor: FC<PropsWithChildren<{
     initialDocument: DocumentId;
+    editMode: boolean;
+    setEditMode: (editMode: boolean) => void;
     updateData: (data: string) => void;
 }>> = ({
     initialDocument,
     updateData,
+    editMode,
+    setEditMode,
 }) => {
         const routeContext = useRouteContext();
 
@@ -60,6 +65,18 @@ const Editor: FC<PropsWithChildren<{
             };
         }, [data]);
 
+        const [html, setHtml] = useState<string | undefined>(undefined);
+
+        useEffect(() => {
+            if (editMode) {
+                return;
+            }
+            if (!data) {
+                return;
+            }
+            setHtml(new showdown.Converter().makeHtml(data));
+        }, [editMode, data]);
+
         return <>
             <div
                 style={{
@@ -93,17 +110,35 @@ const Editor: FC<PropsWithChildren<{
                     >
                         Back
                     </button>
+                    <button
+                        onClick={() => {
+                            setEditMode(!editMode);
+                        }}
+                    >
+                        {editMode ? 'Preview' : 'Edit'}
+                    </button>
                 </div>
-                <textarea
-                    name="editor"
-                    id="editor"
-                    value={data}
-                    rows={20}
-                    onChange={(e) => {
-                        setData(e.target.value);
-                    }}
-                >
-                </textarea>
+                {editMode &&
+                    <textarea
+                        name="editor"
+                        id="editor"
+                        value={data}
+                        rows={20}
+                        onChange={(e) => {
+                            setData(e.target.value);
+                        }}
+                    >
+                    </textarea>
+                }
+                {!editMode && html &&
+                    <div
+                        dangerouslySetInnerHTML={{ __html: html }}
+                        style={{
+                            textAlign: 'left',
+                        }}
+                    >
+                    </div>
+                }
             </div>
         </>;
     };
