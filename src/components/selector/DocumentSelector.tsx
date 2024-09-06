@@ -102,6 +102,7 @@ const DocumentSelector: FC = () => {
                         flexDirection: 'row',
                         gap: '10px',
                         alignItems: 'stretch',
+                        flexWrap: 'wrap',
                     }}
                 >
                     <Button
@@ -116,12 +117,12 @@ const DocumentSelector: FC = () => {
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            flexGrow: 1,
+                            flexGrow: 3,
                         }}
                     >
                         <span>
                             {voidNameEditing
-                                ? <input
+                                ? <TextInput
                                     value={tempVoidName}
                                     onChange={(e) => {
                                         setTempVoidName(e.target.value);
@@ -135,7 +136,7 @@ const DocumentSelector: FC = () => {
                                             setVoidNameEditing(it => !it);
                                         }
                                     }}
-                                ></input>
+                                />
                                 : <b>
                                     {
                                         localVoidData?.name || 'Unnamed'
@@ -152,26 +153,42 @@ const DocumentSelector: FC = () => {
                             {routeContext.voidId}
                         </span>
                     </div>
-                    <Button
-                        onClick={() => {
-                            if (voidNameEditing) {
-                                storageContext.updateVoid(routeContext.voidId, it => ({
-                                    ...it,
-                                    name: tempVoidName,
-                                }));
-                            }
-                            setVoidNameEditing(it => !it);
+                    <div
+                        style={{
+                            flexGrow: 1,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            gap: '10px',
+                            alignItems: 'stretch',
                         }}
                     >
-                        {voidNameEditing ? 'Save' : 'Rename'}
-                    </Button>
-                    <Button
-                        onClick={() => {
-                            setSettingsMode(it => !it);
-                        }}
-                    >
-                        {settingsMode ? 'Documents' : 'Settings'}
-                    </Button>
+                        <Button
+                            style={{
+                                flexGrow: 1,
+                            }}
+                            onClick={() => {
+                                if (voidNameEditing) {
+                                    storageContext.updateVoid(routeContext.voidId, it => ({
+                                        ...it,
+                                        name: tempVoidName,
+                                    }));
+                                }
+                                setVoidNameEditing(it => !it);
+                            }}
+                        >
+                            {voidNameEditing ? 'Save' : 'Rename'}
+                        </Button>
+                        <Button
+                            style={{
+                                flexGrow: 1,
+                            }}
+                            onClick={() => {
+                                setSettingsMode(it => !it);
+                            }}
+                        >
+                            {settingsMode ? 'Documents' : 'Settings'}
+                        </Button>
+                    </div>
                 </div>
                 {!settingsMode && <>
                     <Button

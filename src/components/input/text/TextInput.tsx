@@ -10,6 +10,7 @@ const TextInput = styled.input`
     border-width: 1px;
     border-style: solid;
     font-family: monospace;
+    min-width: 50px;
 
     &:focus,
     &:focus-visible {
