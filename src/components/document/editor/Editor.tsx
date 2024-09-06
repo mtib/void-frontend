@@ -3,10 +3,8 @@ import { DocumentId, useRouteContext } from "../../../context/RouteContext";
 import VoidApiClient from "../../../api/VoidApiClient";
 import showdown from "showdown";
 import { useVoidBackgroundColor, useVoidPrimaryColor } from "../../../context/VoidContext";
-import { VoidStyledButton } from "../../button";
-
-export const outlineColor = '#a06ca0';
-export const backgroundColor = '#1a041a';
+import Button from "../../button/Button";
+import TextArea from "../../input/textarea/TextArea";
 
 const Editor: FC<PropsWithChildren<{
     initialDocument: DocumentId;
@@ -103,46 +101,34 @@ const Editor: FC<PropsWithChildren<{
                     style={{
                         display: "flex",
                         flexDirection: "row",
+                        gap: "10px",
                     }}
                 >
-                    <VoidStyledButton
+                    <Button
                         onClick={() => {
                             forceUpdate();
                             routeContext.setDocumentId(undefined);
                         }}
                     >
                         Back
-                    </VoidStyledButton>
-                    <VoidStyledButton
+                    </Button>
+                    <Button
                         onClick={() => {
                             setEditMode(!editMode);
                         }}
                     >
                         {editMode ? 'Preview' : 'Edit'}
-                    </VoidStyledButton>
+                    </Button>
                 </div>
                 {editMode &&
-                    <textarea
-                        style={{
-                            background: backgroundColor,
-                            color: 'white',
-                            borderColor: primaryColor,
-                            borderWidth: '1px',
-                            borderStyle: 'solid',
-                            borderRadius: '10px',
-                            padding: '10px',
-                            fontFamily: 'monospace',
-                            fontSize: '16px',
-                            flexGrow: 1,
-                        }}
+                    <TextArea
                         name="editor"
                         id="editor"
                         value={data}
                         onChange={(e) => {
                             setData(e.target.value);
                         }}
-                    >
-                    </textarea>
+                    />
                 }
                 {!editMode && html &&
                     <div

@@ -2,9 +2,10 @@ import { FC, useEffect, useState } from "react";
 import { DocumentId, useRouteContext, VoidId } from "../../context/RouteContext";
 import VoidApiClient from "../../api/VoidApiClient";
 import Editor from "../document/editor/Editor";
-import { useCurrentVoidLocalStorage, useVoidBackgroundColor, useVoidPrimaryColor } from "../../context/VoidContext";
+import { useCurrentVoidLocalStorage, useVoidBackgroundColor, useVoidPrimaryColor, VoidThemeProvider } from "../../context/VoidContext";
 import { useStorageContext } from "../../context/StorageContext";
-import { ThemedButton, VoidStyledButton, VoidThemeProvider } from "../button";
+import Button from "../button/Button";
+import TextInput from "../input/text/TextInput";
 
 const extractTitle = (text: string) => {
     const firstNewline = text.indexOf('\n');
@@ -103,14 +104,14 @@ const DocumentSelector: FC = () => {
                         alignItems: 'stretch',
                     }}
                 >
-                    <VoidStyledButton
+                    <Button
                         onClick={() => {
                             routeContext.setDocumentId(undefined);
                             routeContext.setVoidId(undefined);
                         }}
                     >
                         Back
-                    </VoidStyledButton>
+                    </Button>
                     <div
                         style={{
                             display: 'flex',
@@ -151,7 +152,7 @@ const DocumentSelector: FC = () => {
                             {routeContext.voidId}
                         </span>
                     </div>
-                    <VoidStyledButton
+                    <Button
                         onClick={() => {
                             if (voidNameEditing) {
                                 storageContext.updateVoid(routeContext.voidId, it => ({
@@ -163,17 +164,17 @@ const DocumentSelector: FC = () => {
                         }}
                     >
                         {voidNameEditing ? 'Save' : 'Rename'}
-                    </VoidStyledButton>
-                    <VoidStyledButton
+                    </Button>
+                    <Button
                         onClick={() => {
                             setSettingsMode(it => !it);
                         }}
                     >
                         {settingsMode ? 'Documents' : 'Settings'}
-                    </VoidStyledButton>
+                    </Button>
                 </div>
                 {!settingsMode && <>
-                    <VoidStyledButton
+                    <Button
                         onClick={() => {
                             const voidId = routeContext.voidId;
                             if (!voidId) {
@@ -195,7 +196,7 @@ const DocumentSelector: FC = () => {
                         }}
                     >
                         Create document
-                    </VoidStyledButton>
+                    </Button>
                     <div
                         style={{
                             display: 'flex',
@@ -204,11 +205,11 @@ const DocumentSelector: FC = () => {
                             alignItems: 'center',
                         }}
                     >
-                        <span>Regex</span>
-                        <input
+                        <TextInput
                             type="text"
                             name="searchbar"
                             id="searchbar"
+                            placeholder="Full-text search (regex supported)"
                             style={{
                                 flexGrow: 1,
                             }}
@@ -235,10 +236,10 @@ const DocumentSelector: FC = () => {
                                         display: 'flex',
                                         flexDirection: 'row',
                                         gap: '10px',
-                                        alignItems: 'center',
+                                        alignItems: 'stretch',
                                     }}
                                 >
-                                    <VoidStyledButton
+                                    <Button
                                         onClick={() => {
                                             setDocumentEditMode(false);
                                             routeContext.setDocumentId(doc.documentId);
@@ -267,15 +268,15 @@ const DocumentSelector: FC = () => {
                                                     {doc.documentId}
                                                 </span>
                                             </div>}
-                                    </VoidStyledButton>
-                                    <VoidStyledButton
+                                    </Button>
+                                    <Button
                                         onClick={() => {
                                             setDocumentEditMode(true);
                                             routeContext.setDocumentId(doc.documentId);
                                         }}
                                     >
                                         Edit
-                                    </VoidStyledButton>
+                                    </Button>
                                 </div>;
                             })
                     }
@@ -335,9 +336,9 @@ const DocumentSelector: FC = () => {
                                     storageContext.knownVoids.find(it => it.id === routeContext.voidId)?.password || 'None'
                                 }
                             </span>
-                            <VoidStyledButton>
+                            <Button>
                                 Change
-                            </VoidStyledButton>
+                            </Button>
                         </div>
                         <div
                             style={{
@@ -357,7 +358,7 @@ const DocumentSelector: FC = () => {
                                     Color
                                 </b>
                             </span>
-                            <input
+                            <TextInput
                                 value={storageContext.knownVoids.find(it => it.id === routeContext.voidId)?.color || primaryColor}
                                 onChange={(e) => {
                                     storageContext.updateVoid(routeContext.voidId, it => ({
@@ -365,19 +366,8 @@ const DocumentSelector: FC = () => {
                                         color: e.target.value,
                                     }));
                                 }}
-                                style={{
-                                    flexGrow: 1,
-                                    backgroundColor: backgroundColor,
-                                    borderColor: primaryColor,
-                                    padding: '10px',
-                                    borderRadius: '10px',
-                                    borderWidth: '1px',
-                                    borderStyle: 'solid',
-                                    fontFamily: 'monospace',
-                                }}
-                            >
-                            </input>
-                            <ThemedButton
+                            />
+                            <Button
                                 onClick={() => {
                                     storageContext.updateVoid(routeContext.voidId, it => ({
                                         ...it,
@@ -386,7 +376,7 @@ const DocumentSelector: FC = () => {
                                 }}
                             >
                                 Reset
-                            </ThemedButton>
+                            </Button>
                         </div>
                     </div>
                 </>}

@@ -3,7 +3,7 @@ import { dot, magnitude, normalize, outsideRectSample } from "./utils";
 import { VoidContextType } from "../../../context/VoidContext";
 import { DocumentContextType } from "../../../context/DocumentContext";
 import _ from "lodash";
-import { outlineColor } from "../../document/editor/Editor";
+import { outlineColor } from "../../../consts";
 import Color from "color";
 
 let fused = false;
@@ -56,6 +56,7 @@ export function install(
                 }
                 redrawStar(star);
             });
+            app.renderer.background.color = primaryColor.lightness(7).hex();
         }
     });
 

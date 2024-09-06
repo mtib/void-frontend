@@ -4,6 +4,7 @@ import './Background.css';
 import * as VoidSpiralPixi from "./VoidSpiralPixi/VoidSpiralPixi";
 import { useVoidContext, VoidContextType } from "../../context/VoidContext";
 import { DocumentContextType, useDocumentContext } from "../../context/DocumentContext";
+import { useTheme } from "styled-components";
 
 const canvasParentId = 'background-canvas';
 
@@ -15,6 +16,8 @@ function Background() {
 
     const voidContextCallbackRef = useRef<(arg0: VoidContextType) => void>(() => { });
     const documentContextCallbackRef = useRef<(arg0: DocumentContextType) => void>(() => { });
+
+    const theme = useTheme();
 
     useEffect(() => {
         voidContextCallbackRef.current(voidContext);
@@ -39,7 +42,7 @@ function Background() {
         (async () => {
             const app = new Application();
             await app.init({
-                background: '#1a041a',
+                background: theme.bg,
                 antialias: true,
             });
             canvasParent.current!.appendChild(app.canvas);

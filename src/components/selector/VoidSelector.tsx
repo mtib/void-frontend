@@ -4,6 +4,7 @@ import VoidApiClient from "../../api/VoidApiClient";
 import { useVoidContext } from "../../context/VoidContext";
 import { useRouteContext } from "../../context/RouteContext";
 import { sortBy } from "lodash";
+import Button from "../button/Button";
 
 
 const VoidSelector: FC = () => {
@@ -33,11 +34,11 @@ const VoidSelector: FC = () => {
             gap: '10px',
         }}
     >
-        <button onClick={createVoid}>Create new</button>
+        <Button onClick={createVoid}>Create new</Button>
         {
             sortBy(storage.knownVoids, it => it.name || it.id)
                 .map((voidInfo) => {
-                    return <button
+                    return <Button
                         key={voidInfo.id}
                         onClick={() => voids.setVoidId(voidInfo.id)}
                         style={{
@@ -55,7 +56,7 @@ const VoidSelector: FC = () => {
                         >
                             {voidInfo.id}
                         </span>
-                    </button>;
+                    </Button>;
                 })
         }
     </div>;

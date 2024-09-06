@@ -2,8 +2,10 @@ import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffec
 import { useRouteContext, VoidId } from "./RouteContext";
 import VoidApiClient from "../api/VoidApiClient";
 import { useStorageContext, VoidInfo } from "./StorageContext";
-import { backgroundColor, outlineColor } from "../components/document/editor/Editor";
+import { outlineColor } from "../consts";
+import { backgroundColor } from "../consts";
 import Color from "color";
+import { ThemeProvider } from "styled-components";
 
 export interface VoidContextType {
     voidId: string | undefined;
@@ -111,4 +113,10 @@ export const useVoidBackgroundColor = () => {
         return Color(color).lightness(7).hex();
     }
     return backgroundColor;
+};
+
+export const VoidThemeProvider: FC<PropsWithChildren> = ({ children }) => {
+    const primaryColor = useVoidPrimaryColor();
+    const backgroundColor = useVoidBackgroundColor();
+    return <ThemeProvider theme={{ bg: backgroundColor, fg: primaryColor }}>{children}</ThemeProvider>;
 };
